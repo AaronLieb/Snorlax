@@ -1,0 +1,15 @@
+set up cron job for the script
+make the script
+template the math, with variable for the sybmbols and #s 
+make the raspberry pi never fully sleep
+send start up signal to monitor
+turn on light
+stop rain sounds
+play alarm
+
+
+
+configurable times for the cron in config script
+use vcgencmd for powering the monitor on and off
+ $ vcgencmd display_power 1
+ https://www.screenly.io/blog/2017/07/02/how-to-automatically-turn-off-and-on-your-monitor-from-your-raspberry-pi/
