@@ -1,0 +1,139 @@
+#!/usr/bin/python3
+
+import math
+import random
+from audioplayer import AudioPlayer
+import os
+import time
+import _thread
+
+DEBUG = False
+ALGEBRA_MAX_LENGTH = 5;
+CORRECT_ANSWERS_THRESHOLD = 3
+alarm_sound = AudioPlayer('./alarm.mp3')
+
+def main():
+
+    problem_types = ["Algebra", "Multiplication", "Division", "Factoring", "Trigonometry"]
+
+    os.system('vcgencmd display_power 1')
+    os.system('clear')
+    try:
+        _thread.start_new_thread(play_alarm, ())
+    except:
+        print("Thread Error")
+
+
+    correct_answers = 0
+    while correct_answers is not CORRECT_ANSWERS_THRESHOLD:
+        problem_type = random.choice(problem_types)
+        print("\n" + problem_type + "\n")
+        problem, solutions = generateProblem(problem_type)
+        choice = input(problem + " = ").replace(" ", "").lower()
+        if choice in solutions:
+            correct_answers += 1
+        else:
+            print("Incorrect, solution: " + solutions[0])
+
+    print('Bomb successfully diffused')
+    alarm_sound.stop()
+
+    if (not DEBUG):
+        os.system('vcgencmd display_power 0')
+
+
+def play_alarm():
+    alarm_sound.play(loop=True, block=True)
+
+def constant(num, space):
+    if int(num) >= 0:
+        if space:
+            num = "+ " + str(num)
+        else:
+            num = "+" + str(num)
+
+    return str(num)
+
+def leading_coefficient(num, space):
+    if int(num) == 1:
+        return ""
+    elif int(num) == -1:
+        if space:
+            return "- "
+        else:
+            return "-"
+    else:
+        return str(num)
+
+def coefficient(num, space):
+    if abs(int(num)) == 1:
+        if int(num) >= 0:
+            if space:
+                return "+ "
+            else:
+                return "+"
+        else: 
+            if space:
+                return "- "
+            else:
+                return "-"
+    else:
+        return constant(num, space)
+
+def generateProblem(problem_type): # return str: problem, solution
+    problem = ""
+    solutions = []
+    if problem_type == "Algebra":
+        symbols = ["+", "-", "*"]
+        size = random.randint(2, ALGEBRA_MAX_LENGTH)
+        for i in range(size):
+            problem += str(random.randint(0, 10))
+            if (i != size-1):
+                problem += " "  + symbols[random.randint(0, 2)] + " "
+        solutions.append(str(eval(problem)))
+
+    elif problem_type == "Multiplication":
+        problem += str(random.randint(10, 99)) + " * " + str(random.randint(10, 99))
+        solutions.append(str(eval(problem)))
+
+    elif problem_type == "Division":
+        denom = random.randint(3, 9)
+        solution_min = int(100/denom) + 1
+        solution_int = random.randint(solution_min, 99)
+        numer = denom * solution_int
+        problem = str(numer) + " / " + str(denom)
+        solutions.append(str(solution_int))
+
+    elif problem_type == "Two Equations":
+        x = random.randint(1, 20)
+        y = random.randint(1, 20)
+        pass
+    
+    elif problem_type == "Factoring":
+        coef1 = random.randint(1, random.randint(1, 3))
+        coef2 = random.randint(1, random.randint(1, 3))
+        const1 = random.randint(1, 7)
+        const2 = random.randint(1, 7)
+        problem = leading_coefficient(coef1 * coef2, True) + "x^2 " + coefficient(coef1 * const2 + coef2 * const1, True) + "x " + constant(const1 * const2, True)
+        group1 = "(" + leading_coefficient(coef1, False) + "x" + constant(const1, False) + ")"
+        group2 = "(" + leading_coefficient(coef2, False) + "x" + constant(const2, False) + ")"
+        solutions.append(group1 + group2)
+        solutions.append(group2 + group1)
+    
+    elif problem_type == "Trigonometry":
+        radians = ["0", "pi/6", "pi/4", "pi/3", "pi/2", "2pi/3", "3pi/4", "5pi/6", "pi", "7pi/6", "5pi/4", "4pi/3", "3pi/2", "5pi/3", "7pi/4", "11pi/6"]
+        degrees = ["0", "30", "45", "60", "90", "120", "135", "160", "180", "210", "225", "240", "270", "300", "315", "330"]
+
+        wave = random.choice(["sin", "cos", "tan"])
+        using_radians = bool(random.getrandbits(1))
+        angle = random.choice(radians) if using_radians else random.choice(degrees)
+        problem = wave + "(" + angle + ")"
+        solutions.append("test")
+
+
+    if (DEBUG):
+        print("Solution:", solutions[0])
+    return (problem, solutions)
+    
+if __name__ == "__main__":
+    main()
